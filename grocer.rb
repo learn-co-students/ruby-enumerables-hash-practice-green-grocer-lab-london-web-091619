@@ -1,3 +1,4 @@
+# removes duplicates and updates item count
 def consolidate_cart(cart)
     cart.each_with_object({}) do |item, new_cart|
         k, v = item.first
@@ -9,39 +10,30 @@ def consolidate_cart(cart)
     end
 end
 
-def consolidate_coupons(coupons)
-  coupons.group_by { |obj| obj[:item] }.map do |key, value|
-    num_sum = value.sum { |i| i[:num] }
-    cost_sum = value.sum { |i| i[:cost] }
-    Hash[:item, key, :num, num_sum, :cost, cost_sum]
-  end
-end
-
+# adjust item prices after applying coupons
 def apply_coupons(cart, coupons)
   return cart if coupons.count < 1
-  discounted_cart = {}
-  cons_coupons = consolidate_coupons(coupons)
-  cart.each_key do |key|
-    discounted_cart[key] = cart.delete(key) if !cons_coupons.find { |coupon| coupon[:item] == key}
-    cons_coupons.each do |coupon|
-      if key == coupon[:item]
-        discounted_name = "#{key} W/COUPON"
-        coupon_value = coupon[:cost] / coupon[:num]
-        if coupon[:num] >= cart[key][:count]
-          discounted_cart[discounted_name] = {:price => coupon_value, :clearance => cart[key][:clearance], :count => cart[key][:count]}
-          cart[key][:count] = 0
-          discounted_cart[key] = cart[key]
-        elsif coupon[:num] < cart[key][:count]
-          discounted_cart[discounted_name] = {:price => coupon_value, :clearance => cart[key][:clearance], :count => coupon[:num]}
-          cart[key][:count] -= coupon[:num]
-          discounted_cart[key] = cart[key]
-        end
+  # create a copy of cart to manipulate
+  discounted_cart = cart.dup
+  coupons.each do |coupon|
+    key = coupon[:item]
+    coupon_count = coupon[:num]
+    coupon_value = coupon[:cost] / coupon[:num]
+    discounted_name = "#{key} W/COUPON"
+    # if coupon applies to item in cart and there are enough items to qualify
+    if discounted_cart.key?(key) && discounted_cart[key][:count] >= coupon_count
+      discounted_cart[key][:count] -= coupon_count
+      if discounted_cart.key?(discounted_name)
+        discounted_cart[discounted_name][:count] += coupon_count
+      else
+        discounted_cart[discounted_name] = {:price => coupon_value, :clearance => discounted_cart[key][:clearance], :count => coupon_count}
       end
     end
   end
   discounted_cart
 end
 
+# apply 20% discount to clearance items
 def apply_clearance(cart)
   cart.each_with_object({}) do |item, new_cart|
     key = item.first
@@ -53,6 +45,7 @@ def apply_clearance(cart)
   end
 end
 
+# get cart total and apply 10% discount if value over 100
 def total_cart(cart)
   cart_total = 0
   cart.each do |item|
@@ -65,6 +58,7 @@ def total_cart(cart)
   cart_total
 end
 
+# checkout cart
 def checkout(cart, coupons)
   consolidated_cart = (consolidate_cart(cart))
   coupon_cart = apply_coupons(consolidated_cart, coupons)
