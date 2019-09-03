@@ -46,8 +46,7 @@ def apply_clearance(cart)
   cart.each_key { |item_name|
   
     if cart[item_name][:clearance] == true then
-      cart[item_name][:price] *= clearance_multiplier
-      cart[item_name][:price] = cart[item_name][:price].round(2)
+      (cart[item_name][:price] *= clearance_multiplier).round(2)
     end
     
   }
