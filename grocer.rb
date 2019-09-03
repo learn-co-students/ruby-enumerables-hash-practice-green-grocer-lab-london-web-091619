@@ -44,21 +44,29 @@ end
 def apply_clearance(cart)
   clearance_multiplier = 0.8
   cart.each_key { |item_name|
-  print(item_name)
+  
     if cart[item_name][:clearance] == true then
       cart[item_name][:price] *= clearance_multiplier
       cart[item_name][:price] = cart[item_name][:price].round(2)
     end
+    
   }
   return cart
 end
 
 def checkout(cart, coupons)
-  consolidate_cart(cart)
-  print(cart)
-  apply_coupons(cart, coupons)
-  print(cart)
-  apply_clearance(cart)
-  print(cart)
-  return cart
+  final_total = 0
+  final_discount_multiplier = 0.9
+  my_con_cart = consolidate_cart(cart)
+  coup_d_cart = apply_coupons(my_con_cart, coupons)
+  clear_d_cart = apply_clearance(coup_d_cart)
+  
+  clear_d_cart.each_key {|item|
+    
+  
+  if final_total > 100.00 then
+    (final_total *= final_discount_multiplier).round(2)
+  end 
+  
+  return final_total
 end
