@@ -62,7 +62,8 @@ def checkout(cart, coupons)
   clear_d_cart = apply_clearance(coup_d_cart)
   
   clear_d_cart.each_key {|item|
-    
+    final_total += clear_d_cart[item][:price] * clear_d_cart[item][:count]
+  }
   
   if final_total > 100.00 then
     (final_total *= final_discount_multiplier).round(2)
