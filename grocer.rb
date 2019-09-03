@@ -23,11 +23,11 @@ def apply_coupons(cart, coupons)
     n_of_items = item_coupon.values[1]
     discount_cost = item_coupon.values[2]
     
-    if cart.has_key?(update_item) then
-      cart[update_item][:count] -= n_of_items
+    if cart.has_key?(update_item) && cart[update_item][:count] >= n_of_items then
+      cart[update_item][:count] -= n_of_items 
       
       if cart.has_key?("#{update_item} W/COUPON") then
-        cart["#{update_item} W/COUPON"][:count] += n_of_items
+        cart["#{update_item} W/COUPON"][:count] += n_of_items 
       else   
         cart["#{update_item} W/COUPON"] = {}
         cart["#{update_item} W/COUPON"][:count] = n_of_items
