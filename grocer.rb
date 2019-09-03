@@ -18,11 +18,39 @@ def consolidate_cart(cart)
 end
 
 def apply_coupons(cart, coupons)
-  # code here
+  coupons.each {|item_coupon|
+    update_item = item_coupon.values[0]
+    n_of_items = item_coupon.values[1]
+    discount_cost = item_coupon.values[2]
+    
+    if cart.has_key?(update_item) then
+      cart[update_item][:count] -= n_of_items
+      
+      if cart.has_key?("#{update_item} W/COUPON") then
+        cart["#{update_item} W/COUPON"][:count] += n_of_items
+      else   
+        cart["#{update_item} W/COUPON"] = {}
+        cart["#{update_item} W/COUPON"][:count] = n_of_items
+        cart["#{update_item} W/COUPON"][:price] = discount_cost / n_of_items
+        cart["#{update_item} W/COUPON"][:clearance] = cart[update_item][:clearance]
+      end 
+      
+    end 
+    
+  } 
+  return cart
 end
 
 def apply_clearance(cart)
-  # code here
+  clearance_multiplier = 0.8
+  cart.each_key { |item_name|
+  print(item_name)
+    if cart[item_name][:clearance] == true then
+      cart[item_name][:price] *= clearance_multiplier
+      cart[item_name][:price] = cart[item_name][:price].round(2)
+    end
+  }
+  return cart
 end
 
 def checkout(cart, coupons)
