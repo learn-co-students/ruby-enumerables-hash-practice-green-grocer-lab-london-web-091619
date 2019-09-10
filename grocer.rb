@@ -32,5 +32,6 @@ elsif cart[item][:count] >= coupon[:num] && cart.has_key?["#{item} W/COUPON"]
     end
   end
 end
+end
 cart
 end  
