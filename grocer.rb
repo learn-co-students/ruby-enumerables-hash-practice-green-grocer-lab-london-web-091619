@@ -1,16 +1,21 @@
+require 'pry'
+
 def consolidate_cart(cart)
-  new_cart = {}
-  cart.each_with_index { |item|
-    item.each{ |item_name, info|
-      if new_cart[item_name]
-        new_cart[item_name][:count] += 1
-      else
-        new_cart[item_name] = info
-        new_cart[item_name][:count] = 1
-      end
-}}
-new_cart
+  final_hash = {}
+  cart.each {|element_hash|
+  element_name = element_hash.keys[0]
+  element_stats = element_hash.values[0]
+  
+  if final_hash.has_key?(element_name)
+     element_stats[:count] +=1
+  else
+    element_stats[:count] =1
+    final_hash[element_name] = element_stats
+  end
+}
+  final_hash
 end
+
 
 def apply_coupons(cart, coupons)
   coupons.each do |coupon|
@@ -35,31 +40,22 @@ def apply_coupons(cart, coupons)
   cart
 end 
 
-
-
-
 def apply_clearance(cart)
-  new_cart = cart
-  cart.each {|item, info|
-  if info[:clearance]==true
-    new_cart[item][:price] = (cart[item][:price] *0.80).round(2)
-  end
+  cart.each{|product_name, stats|
+  stats[:price] -= stats[:price] * 0.2 if stats[:clearance]
   }
-  new_cart
+  cart
 end
 
-def checkout(cart, coupons)
-  total = 0
-  combined_cart = consolidate_cart(cart)
-  combined_coupons = apply_coupons(combined_cart, coupon)
-  clearing_cart = apply_clearance(combined_coupons)
-  
-  clearing_cart.each{ |item, info|
-  total += info[:price] * info[:count]
-  }
-  
+def checkout(array, coupons)
+  hash_cart = consolidate_cart(array)
+  applied_coupons = apply_coupons(hash_cart, coupons)
+  applied_discount = apply_clearance(applied_coupons)
+  total = applied_discount.reduce(0){|acc, (key,value)| acc += value[:price] * value[:count]}
   if total > 100
-    total = total * 0.9
+    total *= 0.9
   end
   total
 end
+
+
